@@ -4,6 +4,7 @@
 DOCKERIP="172.17.42.1"
 DOCKERSOCK="/var/run/docker.sock"
 LOCALPATH=${HOME}
+PWD=$(cd $(dirname $0); pwd)
 
 # Clean up
 containers=( skydns skydock mongod1 mongod2 mongod3 mongocfg mongos )
@@ -61,12 +62,12 @@ linux*)
 
     sleep 10
 
-    docker run --dns ${DOCKERIP} --name mongos -P -d -v ${LOCALPATH}/mongodata/mongos/log:/var/log/mongodb \
+    docker run --dns ${DOCKERIP} --name mongos -p 27017:27017 -d -v ${LOCALPATH}/mongodata/mongos/log:/var/log/mongodb \
         taka011239/mongodb mongos --configdb mongocfg.mongodb.dev.docker:27017 --logpath /var/log/mongodb/mongod.log
 
     sleep 10
 
-    docker run --dns ${DOCKERIP} -it --rm -v /home/taka/tmp/mongo/docker_mongo/js:/js \
+    docker run --dns ${DOCKERIP} -it --rm -v ${PWD}/js:/js \
         taka011239/mongodb mongo mongos.mongodb.dev.docker /js/addShard.js
     ;;
 esac
